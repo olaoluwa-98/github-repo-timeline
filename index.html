@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>GitHub Repository Timeline</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<section class="intro">
+			<div class="container">
+				<h1>GitHub Repository Timeline &darr;</h1>
+				<h2>
+					Enter a Github username to view timeline of repositories
+				</h2>
+				<form action="#" id="form">
+					<input type="text" id="username" />
+				</form>
+			</div>
+		</section>
+
+		<section class="timeline" style="display: none;">
+			<ul></ul>
+		</section>
+	</body>
+	<script src="octokit-rest.min.js"></script>
+	<script>
+		function animateTimeline() {
+			"use strict";
+
+			// define variables
+			var items = document.querySelectorAll(".timeline li");
+
+			// check if an element is in viewport
+			// http://stackoverflow.com/questions/123999/how-to-tell-if-a-dom-element-is-visible-in-the-current-viewport
+			function isElementInViewport(el) {
+				var rect = el.getBoundingClientRect();
+				return (
+					rect.top >= 0 &&
+					rect.left >= 0 &&
+					rect.bottom <=
+						(window.innerHeight ||
+							document.documentElement.clientHeight) &&
+					rect.right <=
+						(window.innerWidth ||
+							document.documentElement.clientWidth)
+				);
+			}
+
+			function callbackFunc() {
+				for (var i = 0; i < items.length; i++) {
+					if (isElementInViewport(items[i])) {
+						items[i].classList.add("in-view");
+					}
+				}
+			}
+
+			// listen for events
+			window.addEventListener("load", callbackFunc);
+			window.addEventListener("resize", callbackFunc);
+			window.addEventListener("scroll", callbackFunc);
+		}
+
+
+		const form = document.querySelector("#form");
+		let timelineContainer = document.querySelector(".timeline");
+		let timelineList = document.querySelector(".timeline ul");
+		form.addEventListener("submit", fetchRepositories);
+
+		const octokit = new Octokit();
+		function fetchRepositories(event) {
+			const username = document.querySelector("#username").value;
+			octokit.repos
+				.listForUser({
+					username,
+					type: "owner",
+					sort: "created",
+					direction: "desc"
+				})
+				.then(({ data, headers, status }) => {
+					if (status == 200) {
+						console.log(data[0]);
+						for (let i = 0; i < data.length; i++) {
+							const {
+								name,
+								description,
+								created_at,
+								html_url,
+								license,
+								language,
+								pushed_at,
+								updated_at
+							} = data[i];
+							let li = document.createElement("li");
+							let div = document.createElement("div");
+							let divNode = document.createTextNode(description);
+							let time = document.createElement("time");
+							let timeNode = document.createTextNode(created_at);
+							time.appendChild(timeNode);
+							div.appendChild(time);
+							div.appendChild(divNode);
+                            li.appendChild(div);
+                            timelineList.append(li);
+						}
+                        timelineContainer.style.display = "block";
+						animateTimeline();
+					} else {
+						console.log(data, headers, status);
+					}
+				})
+				.catch(error => {
+					console.log(error);
+				});
+		}
+	</script>
+</html>
