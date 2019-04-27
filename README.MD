@@ -6,7 +6,7 @@ The UI was gotten from [Envato Tuts+](https://codepen.io/tutsplus)'s [codepen](h
 
 ## Running the project
 
-Simply clone this repository open `index.html` in a browser.
+Simply clone this repository and open `index.html` in a browser.
 
 ## License
 
