@@ -18,6 +18,7 @@ body {
 .intro {
   background: #F45B69;
   padding: 100px 0;
+  padding-bottom: 30px;
 }
 
 .container {
@@ -138,9 +139,11 @@ time {
 }
 #username {
   height: 30px;
-  width: 40%;
+  width: 200px;
 }
-
+section.timeline ul li div h2 a {
+  color: bisque;
+}
 
 /* GENERAL MEDIA QUERIES
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

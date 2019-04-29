@@ -4,19 +4,22 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-		<title>GitHub Repository Timeline</title>
+		<title>GitHub User Repository Timeline</title>
 		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body>
 		<section class="intro">
 			<div class="container">
-				<h1>GitHub Repository Timeline &darr;</h1>
+				<h1>GitHub User Repository Timeline &darr;</h1>
 				<h2>
-					Enter a Github username to view timeline of repositories
+					Enter a Github username to view the timeline their of repositories
 				</h2>
 				<form action="#" id="form">
 					<input type="text" id="username" />
+					<button type="submit" style="width: 75px; height: 30px">Enter</button>
 				</form>
+				<p id="error-msg" style="display: none;color: #dac8d0;font-size: larger"></p>
+				<div id="user-info" style="display: none; margin-top: 30px"></div>
 			</div>
 		</section>
 
@@ -62,15 +65,21 @@
 			window.addEventListener("scroll", callbackFunc);
 		}
 
-
 		const form = document.querySelector("#form");
 		let timelineContainer = document.querySelector(".timeline");
 		let timelineList = document.querySelector(".timeline ul");
 		form.addEventListener("submit", fetchRepositories);
 
+		const error = document.querySelector("#error-msg"); // error msg element
+		const userInfo = document.querySelector("#user-info"); // user info element
+
 		const octokit = new Octokit();
 		function fetchRepositories(event) {
-			const username = document.querySelector("#username").value;
+			const username = document.querySelector("#username").value; // get the username input
+			if (!username) return; // if user has not typed in anything, do nothing.
+			timelineList.innerHTML = "";
+			error.innerHTML = "";
+			userInfo.innerHTML = "";
 			octokit.repos
 				.listForUser({
 					username,
@@ -80,37 +89,50 @@
 				})
 				.then(({ data, headers, status }) => {
 					if (status == 200) {
-						console.log(data[0]);
-						for (let i = 0; i < data.length; i++) {
+						timelineList.innerHTML = "";
+						let list_of_repos = ""
+						userInfo.innerHTML = `<h2>${username} has ${data.length} public repositories<h2>`;
+						userInfo.style.display = "block";
+						for (let i = 0; i < data.length; i++) { // loop through all the user's repositories
 							const {
 								name,
+								fork,
+								forks_count,
+								stargazers_count,
 								description,
 								created_at,
 								html_url,
-								license,
 								language,
-								pushed_at,
-								updated_at
-							} = data[i];
-							let li = document.createElement("li");
-							let div = document.createElement("div");
-							let divNode = document.createTextNode(description);
-							let time = document.createElement("time");
-							let timeNode = document.createTextNode(created_at);
-							time.appendChild(timeNode);
-							div.appendChild(time);
-							div.appendChild(divNode);
-                            li.appendChild(div);
-                            timelineList.append(li);
+							} = data[i]; // obtain only values we're using
+							list_of_repos += `
+								<li>
+									<div>
+										<h2>
+										${fork? '<img title="This is a fork" src="https://img.icons8.com/material/24/000000/code-fork.png">': ""}
+										<a href="${html_url}">${name}</a> (${created_at.split("-")[0]})
+										</h2>
+										<p>language: ${language}</p>
+										<p>forks: ${forks_count}</p>
+										<p>stars: ${stargazers_count}</p>
+										<p>description: ${description}</p>
+									</div>
+								</li>
+							`;
 						}
+                        timelineList.innerHTML = list_of_repos;
                         timelineContainer.style.display = "block";
 						animateTimeline();
 					} else {
-						console.log(data, headers, status);
+						error.innerText = `An unknown error occured`;
+						error.style.display = "block";
 					}
 				})
-				.catch(error => {
-					console.log(error);
+				.catch( e => {
+					timelineList.innerHTML = "";
+					console.error(e);
+					error.innerText = `GitHub user with username: '${username}' was not found`;
+					error.style.display = "block";
+					username.value = "";
 				});
 		}
 	</script>
