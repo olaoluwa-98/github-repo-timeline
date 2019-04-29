@@ -75,6 +75,7 @@
 
 		const octokit = new Octokit();
 		function fetchRepositories(event) {
+			
 			const username = document.querySelector("#username").value; // get the username input
 			if (!username) return; // if user has not typed in anything, do nothing.
 			timelineList.innerHTML = "";
@@ -134,6 +135,7 @@
 					error.style.display = "block";
 					username.value = "";
 				});
+				event.preventDefault();
 		}
 	</script>
 </html>
